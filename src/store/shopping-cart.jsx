@@ -7,7 +7,13 @@ addItemToCart: () => {},
 updateItemQuantity: () => {},
 });
 
+function shoppingCartReducer(state, action) {
+return state;
+}
+
 export default function CartContextProvider({ children}) {
+const [ shoppingCartState, shoppingCartDispatch ] = useReducer(shoppingCartReducer, { items: [], });
+
     const [shoppingCart, setShoppingCart] = useState({
         items: [],
       });
@@ -16,6 +22,8 @@ export default function CartContextProvider({ children}) {
         setShoppingCart((prevShoppingCart) => {
           const updatedItems = [...prevShoppingCart.items];
     
+        
+
           const existingCartItemIndex = updatedItems.findIndex(
             (cartItem) => cartItem.id === id
           );
@@ -42,6 +50,27 @@ export default function CartContextProvider({ children}) {
           };
         });
       }
+
+      // function handleUpdateCartItemQuantity(id, quantity) {
+      //   setShoppingCart((prevShoppingCart) => {
+      //     const updatedItems = [...prevShoppingCart.items];
+      //     const existingCartItemIndex = updatedItems.findIndex(
+      //       (cartItem) => cartItem.id === id
+      //     );
+      //     if (existingCartItemIndex >= 0) {
+      //       const existingCartItem = updatedItems[existingCartItemIndex];
+      //       const updatedItem = {
+      //         ...existingCartItem,
+      //         quantity: quantity, 
+      //       };
+      //       updatedItems[existingCartItemIndex] = updatedItem;
+      //     }
+      //     return {
+      //       items: updatedItems,
+      //     };
+      //   });
+      // }
+
     const ctxValue = {
         items: shoppingCart.items,
         addItemToCart: handleAddItemToCart,
