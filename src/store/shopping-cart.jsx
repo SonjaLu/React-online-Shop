@@ -1,4 +1,4 @@
-import { createContext, useState, useReducer } from 'react';
+import { createContext, useReducer } from 'react';
 import { DUMMY_PRODUCTS } from '../dummy-products.js';
 
 export const CartContext = createContext({
@@ -37,16 +37,35 @@ return {
   items: updatedItems,
 };
   }
-return state;
-}
+
+  
+  if (action.type === 'UPDATE_ITEM') {
+    const updatedItems = [...state.items];
+    const existingCartItemIndex = updatedItems.findIndex(
+      (item) => item.id === action.payload.productId
+    );
+    const updatedItem = {
+      ...updatedItems[updatedItemIndex],
+    };
+    updatedItem.quantity += action.payload.amount;
+    if (updatedItem.quantity <= 0) {
+      updatedItems.splice(updatedItemIndex, 1);
+    } else {
+      updatedItems[updatedItemIndex] = updatedItem;
+    }
+return {
+  ...state,
+items: updatedItems,
+};
+  }
+    return state;
+  }
+   
 
 export default function CartContextProvider({ children}) {
 const [ shoppingCartState, shoppingCartDispatch ] = useReducer(shoppingCartReducer, { items: [], });
 
-    const [shoppingCart, setShoppingCart] = useState({
-        items: [],
-      });
-    
+   
       function handleAddItemToCart(id) {
 shoppingCartDispatch({
   type: 'ADD_ITEM',
@@ -55,31 +74,22 @@ shoppingCartDispatch({
       }
 
       function handleUpdateCartItemQuantity(productId, amount) {
-        setShoppingCart((prevShoppingCart) => {
-          const updatedItems = [...prevShoppingCart.items];
-          const existingCartItemIndex = updatedItems.findIndex(
-            (item) => item.id === productId
-          );
-          const updatedItem = {
-            ...updatedItems[updatedItemIndex],
-          };
-          updatedItem.quantity += amount;
-          if (updatedItem.quantity <= 0) {
-            updatedItems.splice(updatedItemIndex, 1);
-          } else {
-            updatedItems[updatedItemIndex] = updatedItem;
-          }
-return {
-  items: updatedItems,
-};
-        });
+      shoppingCartDispatch({
+        type: 'UPDATE_ITEM',
+        payload: {
+          productId,
+          amount,
+        },
+      });
       }
 
     const ctxValue = {
-        items: shoppingCart.items,
+        items: shoppingCartState.items,
         addItemToCart: handleAddItemToCart,
         updateItemQuantity: handleUpdateCartItemQuantity,
     };
   
-    return <CartContext.Provider value={ctxValue}></CartContext.Provider>
-}
+    return (
+    <CartContext.Provider value={ctxValue}>{children}</CartContext.Provider>
+    );
+  }
