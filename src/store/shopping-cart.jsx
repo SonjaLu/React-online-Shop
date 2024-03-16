@@ -8,6 +8,35 @@ updateItemQuantity: () => {},
 });
 
 function shoppingCartReducer(state, action) {
+  if (action.type === 'ADD_ITEM') {
+    const updatedItems = [...state.items];
+    
+    const existingCartItemIndex = updatedItems.findIndex(
+      (cartItem) => cartItem.id === action.payload
+    );
+    const existingCartItem = updatedItems[existingCartItemIndex];
+
+    if (existingCartItem) {
+      const updatedItem = {
+        ...existingCartItem,
+        quantity: existingCartItem.quantity + 1,
+      };
+      updatedItems[existingCartItemIndex] = updatedItem;
+    } else {
+      const product = DUMMY_PRODUCTS.find((product) => product.id === action.payload);
+      updatedItems.push({
+        id: action.payload,
+        name: product.title,
+        price: product.price,
+        quantity: 1,
+  });
+}
+
+return {
+  ...state,
+  items: updatedItems,
+};
+  }
 return state;
 }
 
@@ -19,57 +48,32 @@ const [ shoppingCartState, shoppingCartDispatch ] = useReducer(shoppingCartReduc
       });
     
       function handleAddItemToCart(id) {
-        setShoppingCart((prevShoppingCart) => {
-          const updatedItems = [...prevShoppingCart.items];
-    
-        
-
-          const existingCartItemIndex = updatedItems.findIndex(
-            (cartItem) => cartItem.id === id
-          );
-          const existingCartItem = updatedItems[existingCartItemIndex];
-    
-          if (existingCartItem) {
-            const updatedItem = {
-              ...existingCartItem,
-              quantity: existingCartItem.quantity + 1,
-            };
-            updatedItems[existingCartItemIndex] = updatedItem;
-          } else {
-            const product = DUMMY_PRODUCTS.find((product) => product.id === id);
-            updatedItems.push({
-              id: id,
-              name: product.title,
-              price: product.price,
-              quantity: 1,
-            });
-          }
-    
-          return {
-            items: updatedItems,
-          };
-        });
+shoppingCartDispatch({
+  type: 'ADD_ITEM',
+  payload: id
+});
       }
 
-      // function handleUpdateCartItemQuantity(id, quantity) {
-      //   setShoppingCart((prevShoppingCart) => {
-      //     const updatedItems = [...prevShoppingCart.items];
-      //     const existingCartItemIndex = updatedItems.findIndex(
-      //       (cartItem) => cartItem.id === id
-      //     );
-      //     if (existingCartItemIndex >= 0) {
-      //       const existingCartItem = updatedItems[existingCartItemIndex];
-      //       const updatedItem = {
-      //         ...existingCartItem,
-      //         quantity: quantity, 
-      //       };
-      //       updatedItems[existingCartItemIndex] = updatedItem;
-      //     }
-      //     return {
-      //       items: updatedItems,
-      //     };
-      //   });
-      // }
+      function handleUpdateCartItemQuantity(productId, amount) {
+        setShoppingCart((prevShoppingCart) => {
+          const updatedItems = [...prevShoppingCart.items];
+          const existingCartItemIndex = updatedItems.findIndex(
+            (item) => item.id === productId
+          );
+          const updatedItem = {
+            ...updatedItems[updatedItemIndex],
+          };
+          updatedItem.quantity += amount;
+          if (updatedItem.quantity <= 0) {
+            updatedItems.splice(updatedItemIndex, 1);
+          } else {
+            updatedItems[updatedItemIndex] = updatedItem;
+          }
+return {
+  items: updatedItems,
+};
+        });
+      }
 
     const ctxValue = {
         items: shoppingCart.items,
